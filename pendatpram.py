@@ -17,7 +17,7 @@ st.write("""
 # TUGAS PENDAT
 """)
 
-importdata, preprocessing = st.tabs(["Import Data", "Preprocessing"])
+importdata, preprocessing, modelling, evaluasi, implementasi = st.tabs(["Import Data", "Preprocessing", "Modelling", "Evaluasi", "Implementasi"])
 
 with importdata:
     st.write("Import Data")
