@@ -15,12 +15,9 @@ from sklearn.svm import SVC
 
 st.write(""" 
 # TUGAS PENDAT
-Oleh Pramudya Dwi Febrianto (200411100042)
 """)
 
-st.write("=========================================================================")
-
-importdata, preprocessing, model, hasil = st.tabs(["Import Data", "Preprocessing", "Modelling", "Evalutions"])
+importdata, preprocessing = st.tabs(["Import Data", "Preprocessing"])
 
 with importdata:
     st.write("Import Data")
