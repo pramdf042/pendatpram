@@ -1,21 +1,19 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-from sklearn import preprocessing
+import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from numpy import array
-from sklearn import tree
-from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
 from collections import OrderedDict
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score, f1_score
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.datasets import make_classification
 from sklearn.svm import SVC
+import os
+import warnings
 import altair as alt
 from sklearn.utils.validation import joblib
 
@@ -25,9 +23,7 @@ st.write("""
 """)
 
 description, importdata, preprocessing, modelling, implementation = st.tabs(["Description", "Import Data", "Preprocessing", "Modelling", "Implementation"])
-
-
-
+warnings.filterwarnings("ignore")
 with importdata:
     st.write("""# Upload File""")
     uploaded_files = st.file_uploader("Upload file CSV", accept_multiple_files=True)
@@ -36,43 +32,39 @@ with importdata:
         st.write("Nama File Anda = ", uploaded_file.name)
         st.dataframe(df)
 
-
 with preprocessing:
-    st.write("""# Preprocessing""")
-    df = pd.read_csv("https://raw.githubusercontent.com/pramdf042/datamining/main/water_potability.csv")
-    df['Sulfate'] = df['Sulfate'].fillna(value=df['Sulfate'].median())
-    df['ph'] = df['ph'].fillna(value=df['ph'].median())
-    df['Trihalomethanes'] = df['Trihalomethanes'].fillna(value=df['Trihalomethanes'].median())
-    df
-    df[["ph", "Hardness", "Solids", "Chloramines", "Sulfate", "Conductivity", "Organic_carbon", "Trihalomethanes", "Turbidity"]].agg(['min','max'])
-    df.Potability.value_counts()
-    X = df.drop(columns="Potability")
-    y = df["Potability"]
-    "### Normalize data transformasi"
-    X
+    prepros = st.radio(
+    "Silahkan pilih metode preprocessing :",
+    ("Normalisasi", "Min Max Scaler", "Categorical to Numeric"))
+    prepoc = st.button("Preprocessing")
 
-    X.shape, y.shape
+    if prepros == "Min Max Scaler":
+        if prepoc:
+            df[["Area", "MajorAxisLength", "MinorAxisLength", "Eccentricity", "ConvexArea", "EquivDiameter", "Extent", "Perimeter", "Roundness", "AspectRation"]].agg(['min','max'])
+            df.Class.value_counts()
+            X = df.drop(columns=["Class","id"])
+            y = df["Class"]
+            "### Normalize data transformasi"
+            X
+            X.shape, y.shape
+            #   le.inverse_transform(y)
+            labels = pd.get_dummies(df.Class).columns.values.tolist()
+            "### Label"
+            labels
+            # """## Normalisasi MinMax Scaler"""
+            scaler = MinMaxScaler()
+            scaler.fit(X)
+            X = scaler.transform(X)
+            X
+            X.shape, y.shape
 
-    #le.inverse_transform(y)
-
-    labels = pd.get_dummies(df.Potability).columns.values.tolist()
-    
-    "### Label"
-    labels
-
-    # """## Normalisasi MinMax Scaler"""
-
-
-    scaler = MinMaxScaler()
-    scaler.fit(X)
-    X = scaler.transform(X)
-    X
-
-    X.shape, y.shape
 
 
 
 with modelling:
+    # df = pd.read_csv("https://raw.githubusercontent.com/pramdf042/datamining/main/riceClassification.csv")
+    X=df.iloc[:,:-1]
+    y=df.iloc[:,-1]
     X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=4)
     from sklearn.preprocessing import StandardScaler
     sc = StandardScaler()
@@ -133,48 +125,25 @@ with modelling:
         if mod :
             st.write("Model Decision Tree accuracy score : {0:0.2f}" . format(akurasiii))
     
-    eval = st.button("Evaluasi semua model")
-    if eval :
-        # st.snow()
-        source = pd.DataFrame({
-            'Nilai Akurasi' : [akurasi,skor_akurasi,akurasiii],
-            'Nama Model' : ['Naive Bayes','KNN','Decision Tree']
-        })
-
-        bar_chart = alt.Chart(source).mark_bar().encode(
-            y = 'Nilai Akurasi',
-            x = 'Nama Model'
-        )
-
-        st.altair_chart(bar_chart,use_container_width=True)
-
-
 
 with implementation:
     st.write("# Implementation")
-    ph = st.number_input('Masukkan pH Air')
-    Hardness = st.number_input('Masukkan Hardness Air')
-    Solids = st.number_input('Masukkan Solids Air')
-    Chloramines = st.number_input('Masukkan Chloramines Air')
-    Sulfate = st.number_input('Masukkan Sulfate Air')
-    Conductivity = st.number_input('Masukkan Conductivity Air')
-    Organic_carbon = st.number_input('Masukkan Organic Carbon Air')
-    Trihalomethanes = st.number_input('Masukkan Trihalomethanes Air')
-    Turbidity = st.number_input('Masukkan Turbidity Air')
+    Area = st.number_input('Masukkan Area')
+    MajorAxisLength = st.number_input('Masukkan MajorAxisLength')
+    MinorAxisLength = st.number_input('Masukkan MinorAxisLength')
+    Eccentricity = st.number_input('Masukkan Eccentricity')
+    ConvexArea = st.number_input('Masukkan ConvexArea')
+    EquivDiameter = st.number_input('Masukkan EquivDiameter')
+    Extent = st.number_input('Masukkan Extent')
+    Perimeter = st.number_input('Masukkan Perimeter')
+    Roundness = st.number_input('Masukkan Roundness')
+    AspectRation = st.number_input('Masukkan AspectRation')
 
     def submit():
         # input
         inputs = np.array([[
-            ph,
-            Hardness,
-            Solids,
-            Chloramines,
-            Sulfate,
-            Conductivity,
-            Organic_carbon,
-            Trihalomethanes,
-            Turbidity
-            ]])
+            Area, MajorAxisLength, MinorAxisLength, Eccentricity, ConvexArea, EquivDiameter, Extent, Perimeter, Roundness, AspectRation
+        ]])
         # st.write(inputs)
         # baru = pd.DataFrame(inputs)
         # input = pd.get_dummies(baru)
@@ -182,12 +151,14 @@ with implementation:
         # inputan = np.array(input)
         # import label encoder
         le = joblib.load("le.save")
-        model1 = joblib.load("knn.joblib")
+        model1 = joblib.load("tree.joblib")
         y_pred3 = model1.predict(inputs)
-        st.write(f"Berdasarkan data yang Anda masukkan, maka anda dinyatakan : {le.inverse_transform(y_pred3)[0]}")
+        if le.inverse_transform(y_pred3)[0]==1:
+            hasilakhir='Jasmine'
+        else :
+            hasilakhir='Gonen'
+        st.write(f"Berdasarkan data yang Anda masukkan, maka beras dinyatakan memiliki jenis: {hasilakhir}")
 
     all = st.button("Submit")
     if all :
-        st.balloons()
         submit()
-
